@@ -1,0 +1,80 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Chat with socketIO</title>
+
+<style media="screen">
+    body {width: 500px; margin: 0 auto; margin-top: 2rem; }
+    .send {width: 100%; margin: 0; padding: 0; margin-top: 1rem; }
+    input.text {width: 80%; margin: 0; padding: 0; padding: 5px; }
+    .btn {padding: 5px 0; width: 82px; background-color: #eee; border: 0; margin: 0; border: solid #eee;        }
+    .btn:hover {background-color: #00e4bc}
+    ul {list-style-type: none;width: 100%;padding: 0;margin: 0;}
+    li { padding: 5px 10px; }
+    li:nth-child(odd) {background-color: #eee}
+</style>
+  
+<!-- messages list -->
+<ul class="ul" id="messages"></ul>
+<!-- submit button -->
+
+<div class="send">
+    <input class="text" autofocus="" id="mesasge" autocomplete="off" placeholder="Your message here">
+    <button class="btn" id="send_mesasge">Send</button>
+</div>
+
+
+<!-- imports Socket.io client -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    // Enter sends the message
+    document.getElementById('mesasge').addEventListener('keypress', function(e) {
+        var key = e.which || e.keyCode;
+        if (key == 13) {
+            send_mesasge();
+        }
+    });
+    // starts Socket.io client
+    var socket = io();
+    // opens a popup
+    var user_name = prompt("Qual seu nome?");
+    // show some fake names
+    var ff = [
+        "Cloud Strife",
+        "Sephiroth",
+        "Vincent Valentine",
+        "Zack Fair",
+        "Aerith Gainsborough",
+        "Tifa Lockhart",
+        "Barret Wallace",
+        "Yuffie Kisaragi",
+    ];
+    // if not selected some random name will be picked
+    if (user_name === null || user_name == "" || user_name == " ") {
+        user_name = ff[Math.floor(Math.random() * ff.length)];
+    }
+
+    socket.emit('chat message', "Bem vindo! " + user_name);
+    // adds an addEventListener to submit button
+    document.getElementById('send_mesasge').addEventListener("click", send_mesasge);
+    // creates a function to connect the websocket then send the message
+    function send_mesasge() {
+    // saves the message as string
+    msg = document.getElementById('mesasge').value;
+    if (msg.length > 0) {
+        console.log(msg);
+        // concat the user and the message to sent to Socket.io
+        socket.emit('chat message', user_name + ": " + msg);
+        // reset the input value
+        document.getElementById('mesasge').value = "";
+    }
+    }
+    // always that a message is received it is added to the list
+    socket.on('chat message', function(msg){
+        let ul = document.getElementById("messages");
+        let li = document.createElement('li');
+        let br = document.createElement('br');
+        li.appendChild(document.createTextNode(msg));
+        ul.appendChild(li);
+    });
+</script>
